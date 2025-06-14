@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const morgan = require('morgan');
 const connectDB = require('./config/db');
 const errorHandler = require('./middleware/errorhandler');
 
@@ -14,6 +15,13 @@ const createApp = () => {
   // Middleware
   app.use(cors());
   app.use(express.json());
+  
+  // Logging middleware
+  if (process.env.NODE_ENV === 'development') {
+    app.use(morgan('dev')); // Logs in development format
+  } else {
+    app.use(morgan('combined')); // Logs in production format
+  }
 
   // Health check endpoint
   app.get('/health', (req, res) => {
