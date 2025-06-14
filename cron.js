@@ -30,8 +30,8 @@ const pingHealthEndpoint = async () => {
   }
 };
 
-// Schedule the cron job to run every 5 minutes
-cron.schedule('*/5 * * * *', () => {
+// Schedule the cron job to run every 1 minute
+cron.schedule('* * * * *', () => {
   console.log('Running scheduled health check...');
   pingHealthEndpoint();
 });
