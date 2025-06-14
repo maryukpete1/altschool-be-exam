@@ -2,11 +2,11 @@
   "name": "blogging-api",
   "version": "1.0.0",
   "description": "A blogging API for diploma project",
-"main": "index.js",
-"scripts": {
-  "start": "node index.js",
-  "dev": "nodemon index.js",
-  "test": "jest --watchAll --verbose"
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "jest --watchAll --verbose"
 
 },
   "repository": {
