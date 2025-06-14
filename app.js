@@ -15,6 +15,11 @@ const createApp = () => {
   app.use(cors());
   app.use(express.json());
 
+  // Health check endpoint
+  app.get('/health', (req, res) => {
+    res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+  });
+
   // Mount routers
   app.use('/api/auth', authRoutes);
   app.use('/api/blogs', blogRoutes);

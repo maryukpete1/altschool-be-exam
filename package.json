@@ -7,8 +7,7 @@
     "start": "node index.js",
     "dev": "nodemon index.js",
     "test": "jest --watchAll --verbose"
-
-},
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/maryukpete1/altschool-be-exam.git"
@@ -29,6 +28,7 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.15.2",
     "mongoose-paginate-v2": "^1.9.1",
+    "node-cron": "^3.0.3",
     "validator": "^13.15.15"
   },
   "devDependencies": {
