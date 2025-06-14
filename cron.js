@@ -8,10 +8,13 @@ const APP_URL = process.env.APP_URL || 'http://localhost:3000';
 // Function to ping the health endpoint
 const pingHealthEndpoint = async () => {
   const client = APP_URL.startsWith('https') ? https : http;
+  const timestamp = new Date().toISOString();
   
   try {
+    console.log(`[${timestamp}] Initiating health check to ${APP_URL}/health`);
+    
     const response = await new Promise((resolve, reject) => {
-      client.get(`${APP_URL}/health`, (res) => {
+      const req = client.get(`${APP_URL}/health`, (res) => {
         let data = '';
         res.on('data', (chunk) => {
           data += chunk;
@@ -19,25 +22,54 @@ const pingHealthEndpoint = async () => {
         res.on('end', () => {
           resolve({ statusCode: res.statusCode, data: JSON.parse(data) });
         });
-      }).on('error', (err) => {
+      });
+
+      req.on('error', (err) => {
         reject(err);
+      });
+
+      // Set a timeout of 10 seconds
+      req.setTimeout(10000, () => {
+        req.destroy();
+        reject(new Error('Request timeout'));
       });
     });
 
-    console.log(`Health check successful at ${new Date().toISOString()}:`, response.data);
+    console.log(`[${timestamp}] Health check successful:`, {
+      statusCode: response.statusCode,
+      data: response.data,
+      nextRun: new Date(Date.now() + 5 * 60 * 1000).toISOString() // Show when next run will be
+    });
   } catch (error) {
-    console.error('Health check failed:', error.message);
+    console.error(`[${timestamp}] Health check failed:`, error.message);
   }
 };
 
-// Schedule the cron job to run every 1 minute
-cron.schedule('* * * * *', () => {
-  console.log('Running scheduled health check...');
-  pingHealthEndpoint();
+// Schedule the cron job to run every 5 minutes
+const cronJob = cron.schedule('*/5 * * * *', async () => {
+  const now = new Date();
+  console.log(`\n[${now.toISOString()}] ===== Starting scheduled health check =====`);
+  await pingHealthEndpoint();
+  console.log(`[${now.toISOString()}] ===== Completed scheduled health check =====\n`);
+}, {
+  scheduled: true,
+  timezone: "UTC" // Use UTC to avoid timezone issues
 });
 
 // Run immediately on startup
-console.log('Starting health check cron job...');
+console.log('\n=== Starting health check service ===');
+console.log(`Service URL: ${APP_URL}`);
+console.log(`Schedule: Every 5 minutes (UTC)`);
+console.log(`Next run: ${new Date(Date.now() + 5 * 60 * 1000).toISOString()}`);
+console.log('===================================\n');
+
 pingHealthEndpoint();
 
-module.exports = { pingHealthEndpoint }; 
+// Handle process termination
+process.on('SIGTERM', () => {
+  console.log('\n=== Stopping health check service ===');
+  cronJob.stop();
+  process.exit(0);
+});
+
+module.exports = { pingHealthEndpoint, cronJob }; 
